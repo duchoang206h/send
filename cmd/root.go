@@ -13,6 +13,7 @@ var (
 	pathFileFlag      string
 	pathDirectoryFlag string
 )
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "",
@@ -26,30 +27,30 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
-	Run:  func(_ *cobra.Command, _ []string) { 
+	Run: func(_ *cobra.Command, _ []string) {
 		ctx := context.Background()
 		rsChan := make(chan string)
-		errChan :=make(chan error)
+		errChan := make(chan error)
 		var wait sync.WaitGroup
 		wait.Add(1)
-		go func (rs chan string, err chan error, wg *sync.WaitGroup)  {
+		go func(rs chan string, err chan error, wg *sync.WaitGroup) {
 			defer wg.Done()
 			send.PrintResult(rs, err)
 		}(rsChan, errChan, &wait)
 		var (
 			result string
-			err error
+			err    error
 		)
 		switch true {
-			case pathFileFlag != "":
-				result, err = send.SendFile(ctx, pathFileFlag);
-			case pathDirectoryFlag != "":
-				result, err = send.SendDirectory(ctx, pathDirectoryFlag);
+		case pathFileFlag != "":
+			result, err = send.SendFile(ctx, pathFileFlag)
+		case pathDirectoryFlag != "":
+			result, err = send.SendDirectory(ctx, pathDirectoryFlag)
 		}
 		if err != nil {
 			errChan <- err
-		}else {
-			rsChan <-result
+		} else {
+			rsChan <- result
 		}
 		wait.Wait()
 	},
@@ -73,8 +74,6 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().StringVarP(&pathFileFlag ,"file", "f", "", "Path to file")
-	rootCmd.Flags().StringVarP(&pathDirectoryFlag,"directory", "d", "", "Path to directory")
+	rootCmd.Flags().StringVarP(&pathFileFlag, "file", "f", "", "Path to file")
+	rootCmd.Flags().StringVarP(&pathDirectoryFlag, "directory", "d", "", "Path to directory")
 }
-
-

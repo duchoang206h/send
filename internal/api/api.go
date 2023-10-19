@@ -13,17 +13,17 @@ import (
 
 	"github.com/duchoang206h/send-cli/config"
 )
-type Config struct {
-	
-}
-type ResultHttp struct {
-	Result string `json:"result"`
-}
-func UploadFile (ctx context.Context,  filePath string) (*ResultHttp, error){
-	uploadUrl:= fmt.Sprintf("%s/api/file", config.Config("API_URL"))
-	fmt.Println("uploadUrl", uploadUrl)
-	file, err := os.Open(filePath)
 
+type (
+	Config     struct{}
+	ResultHttp struct {
+		Result string `json:"result"`
+	}
+)
+
+func UploadFile(ctx context.Context, filePath string) (*ResultHttp, error) {
+	uploadUrl := fmt.Sprintf("%s/api/file", config.Config("API_URL"))
+	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -31,35 +31,28 @@ func UploadFile (ctx context.Context,  filePath string) (*ResultHttp, error){
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
-
 	if err != nil {
 		return nil, err
-
 	}
 	_, err = io.Copy(part, file)
 
 	if err != nil {
 		return nil, err
-
 	}
 	err = writer.Close()
 
 	if err != nil {
 		return nil, err
 	}
-	request, err := http.NewRequestWithContext(ctx, "POST", uploadUrl , &requestBody)
-
+	request, err := http.NewRequestWithContext(ctx, "POST", uploadUrl, &requestBody)
 	if err != nil {
 		return nil, err
-
 	}
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 	client := &http.Client{}
 	response, err := client.Do(request)
-	fmt.Println("response", response)
 	if err != nil {
 		return nil, err
-
 	}
 	defer response.Body.Close()
 
@@ -67,13 +60,11 @@ func UploadFile (ctx context.Context,  filePath string) (*ResultHttp, error){
 		return nil, err
 	}
 	body, err := io.ReadAll(response.Body)
-
 	if err != nil {
-    return nil, err
+		return nil, err
 	}
 	var result ResultHttp
 	err = json.Unmarshal(body, &result)
-	fmt.Println("err", err)
 
 	if err != nil {
 		return nil, err
